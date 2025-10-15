@@ -124,3 +124,30 @@ img{
     text-align:center;
     box-shadow: 2px 2px 3px #999;  
 }
+
+.frame{
+        margin: 50px auto;
+        width:1400px;
+        height:700px;
+        border:1px solid black;
+        border-radius: 20px;
+        box-shadow: inset #0C9;
+}
+
+.title {
+    background-color: white;
+}
+.img, .text{
+    display: flex;
+    align-items: center;
+}
+.content{
+    display: flex;
+    justify-content: space-around;
+
+}
+.content-info{
+    display: flex;
+    justify-content: center;
+    align-items:center ;
+}

@@ -67,15 +67,48 @@ app.get('/fetchDealers', async (_req, res) => {
 });
 
 // Express route to fetch Dealers by a particular state
+const STATE_MAP = {
+  ALABAMA: 'AL', ALASKA: 'AK', ARIZONA: 'AZ', ARKANSAS: 'AR',
+  CALIFORNIA: 'CA', COLORADO: 'CO', CONNECTICUT: 'CT', DELAWARE: 'DE',
+  FLORIDA: 'FL', GEORGIA: 'GA', HAWAII: 'HI', IDAHO: 'ID',
+  ILLINOIS: 'IL', INDIANA: 'IN', IOWA: 'IA', KANSAS: 'KS',
+  KENTUCKY: 'KY', LOUISIANA: 'LA', MAINE: 'ME', MARYLAND: 'MD',
+  MASSACHUSETTS: 'MA', MICHIGAN: 'MI', MINNESOTA: 'MN', MISSISSIPPI: 'MS',
+  MISSOURI: 'MO', MONTANA: 'MT', NEBRASKA: 'NE', NEVADA: 'NV',
+  'NEW HAMPSHIRE': 'NH', 'NEW JERSEY': 'NJ', 'NEW MEXICO': 'NM', 'NEW YORK': 'NY',
+  'NORTH CAROLINA': 'NC', 'NORTH DAKOTA': 'ND', OHIO: 'OH', OKLAHOMA: 'OK',
+  OREGON: 'OR', PENNSYLVANIA: 'PA', 'RHODE ISLAND': 'RI', 'SOUTH CAROLINA': 'SC',
+  'SOUTH DAKOTA': 'SD', TENNESSEE: 'TN', TEXAS: 'TX', UTAH: 'UT',
+  VERMONT: 'VT', VIRGINIA: 'VA', WASHINGTON: 'WA', 'WEST VIRGINIA': 'WV',
+  WISCONSIN: 'WI', WYOMING: 'WY', 'DISTRICT OF COLUMBIA': 'DC'
+};
+
+// Express route to fetch Dealers by a particular state (tên hoặc mã)
 app.get('/fetchDealers/:state', async (req, res) => {
   try {
-    const stateCode = String(req.params.state || '').trim().toUpperCase();
-    if (!stateCode) {
+    const raw = String(req.params.state || '').trim();
+    if (!raw) {
       return res.status(400).json({ error: 'State is required' });
     }
-    const dealers = await Dealerships.find({ state: stateCode });
-    res.json(dealers);
+
+    // Chuẩn hoá đầu vào
+    const upper = raw.toUpperCase();
+
+    // Nếu user gửi tên bang (KANSAS) → map sang mã (KS). Nếu đã là mã (ks) → lên KS.
+    const code = STATE_MAP[upper] || upper;
+
+    // Truy vấn theo mã 2 ký tự (phù hợp dataset phổ biến)
+    const dealers = await Dealerships.find({ state: code });
+
+    // (Tuỳ chọn nhẹ, không bắt buộc) nếu rỗng, thử match tên đầy đủ phòng khi DB lưu tên
+    if (!dealers.length && STATE_MAP[upper]) {
+      const dealersByName = await Dealerships.find({ state: new RegExp(`^${upper}$`, 'i') });
+      if (dealersByName.length) return res.json(dealersByName);
+    }
+
+    return res.json(dealers);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Error fetching dealerships by state' });
   }
 });

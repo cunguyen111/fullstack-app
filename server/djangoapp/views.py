@@ -87,27 +87,21 @@ def registration(request):
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
 def get_dealerships(request, state="All"):
-    if(state == "All"):
-        endpoint = "/fetchDealers"
-    else:
-        endpoint = "/fetchDealers/" + state
-    
-    dealerships = get_request(endpoint)
+    endpoint = "/fetchDealers" if state == "All" else f"/fetchDealers/{state}"
+    dealerships = get_request(endpoint) or []
     return JsonResponse({"status": 200, "dealers": dealerships})
 
 # Create a `get_dealer_reviews` view to render the reviews of a dealer
 def get_dealer_reviews(request, dealer_id):
-    # if dealer id has been provided
-    if(dealer_id):
-        endpoint = "/fetchReviews/dealer/"+str(dealer_id)
-        reviews = get_request(endpoint)
+    if dealer_id:
+        endpoint = f"/fetchReviews/dealer/{dealer_id}"
+        reviews = get_request(endpoint) or []
         for review_detail in reviews:
-            response = analyze_review_sentiments(review_detail['review'])
-            print(response)
-            review_detail['sentiment'] = response['sentiment']
-        return JsonResponse({"status":200,"reviews":reviews})
-    else:
-        return JsonResponse({"status":400,"message":"Bad Request"})
+            sentiment_resp = analyze_review_sentiments(review_detail.get('review', ''))
+            review_detail['sentiment'] = (sentiment_resp or {}).get('sentiment', 'unknown')
+        return JsonResponse({"status": 200, "reviews": reviews})
+    return JsonResponse({"status": 400, "message": "Bad Request"})
+
 
 # Create a `get_dealer_details` view to render the dealer details
 def get_dealer_details(request, dealer_id):
@@ -120,12 +114,10 @@ def get_dealer_details(request, dealer_id):
 
 # Create a `add_review` view to submit a review
 def add_review(request):
-    if(request.user.is_anonymous == False):
-        data = json.loads(request.body)
-        try:
-            response = post_review(data)
-            return JsonResponse({"status":200})
-        except:
-            return JsonResponse({"status":401,"message":"Error in posting review"})
-    else:
-        return JsonResponse({"status":403,"message":"Unauthorized"})
+    if request.user.is_anonymous:
+        return JsonResponse({"status": 403, "message": "Unauthorized"})
+    data = json.loads(request.body)
+    resp = post_review(data)
+    if resp is not None:
+        return JsonResponse({"status": 200})
+    return JsonResponse({"status": 502, "message": "Error in posting review"})

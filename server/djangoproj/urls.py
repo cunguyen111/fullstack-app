@@ -13,6 +13,8 @@ urlpatterns = [
 
     # ===== API aliases (không prefix) =====
     # Cho phép JS gọi thẳng /reviews/dealer/<id>
+        # ===== API aliases (không prefix) =====
+    # Cho phép JS gọi thẳng /reviews/dealer/<id>
     path(
         'reviews/dealer/<int:dealer_id>',
         app_views.get_dealer_reviews,

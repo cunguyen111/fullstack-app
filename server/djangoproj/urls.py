@@ -14,8 +14,6 @@ urlpatterns = [
 
     # ===== API aliases (không prefix) =====
     # Cho phép JS gọi thẳng /reviews/dealer/<id>
-        # ===== API aliases (không prefix) =====
-    # Cho phép JS gọi thẳng /reviews/dealer/<id>
     path(
         'reviews/dealer/<int:dealer_id>',
         app_views.get_dealer_reviews,
@@ -58,5 +56,5 @@ urlpatterns = [
 
     # (Tuỳ chọn) Manifest để khỏi 404 nếu bạn có file templates/manifest.json
     # re_path(r'^manifest\.json$', TemplateView.as_view(
-    #     template_name="manifest.json", content_type='application/json')), 
+    #     template_name="manifest.json", content_type='application/json')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,19 +1,18 @@
 # djangoproj/urls.py
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.generic import TemplateView
 
-# Alias trực tiếp tới view để frontend có thể gọi /reviews/dealer/<id> mà không cần /djangoapp/
+# Alias trực tiếp tới view để frontend có thể gọi
+# /reviews/dealer/<id> mà không cần /djangoapp/
 from djangoapp import views as app_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # ===== API aliases (không prefix) =====
-    # Cho phép JS gọi thẳng /reviews/dealer/<id>
-        # ===== API aliases (không prefix) =====
     # Cho phép JS gọi thẳng /reviews/dealer/<id>
     path(
         'reviews/dealer/<int:dealer_id>',
@@ -57,5 +56,5 @@ urlpatterns = [
 
     # (Tuỳ chọn) Manifest để khỏi 404 nếu bạn có file templates/manifest.json
     # re_path(r'^manifest\.json$', TemplateView.as_view(
-    #     template_name="manifest.json", content_type='application/json')), 
+    #     template_name="manifest.json", content_type='application/json')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
